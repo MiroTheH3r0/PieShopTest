@@ -12,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using BethanysPieShop.Auth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BethanysPieShop
 {
@@ -47,7 +49,23 @@ namespace BethanysPieShop
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<ShoppingCart>(sp => ShoppingCart.GetCart(sp));
             services.AddTransient<IOrderRepository, OrderRepository>();
+            services.AddSingleton<IAuthorizationHandler, MinimumOrderAgeHandler>();
+            services.AddTransient<IPieReviewRepository, PieReviewRepository>();
+
+            //anti-forgery
+            services.AddAntiforgery(opts => { opts.RequireSsl = true;  });
+            services.AddMvc(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+
             services.AddMvc();
+
+            //claims
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator"));
+                options.AddPolicy("DeletePie", policy => policy.RequireClaim("Delete Pie", "Delete Pie"));
+                options.AddPolicy("AddPie", policy => policy.RequireClaim("Add Pie", "Add Pie"));
+                options.AddPolicy("MinimumOrderAge", policy => policy.Requirements.Add(new MinimumOrderAgeRequirement(18)));
+            });
 
             services.AddMemoryCache();
             services.AddSession();
@@ -71,6 +89,12 @@ namespace BethanysPieShop
             app.UseSession();
             app.UseIdentity();
             //app.UseMvcWithDefaultRoute();
+
+            app.UseGoogleAuthentication(new GoogleOptions
+            {
+                ClientId = "911429943669-mir3si412v39ithk1ljo8jeglthnt6so.apps.googleusercontent.com",
+                ClientSecret = "9lz6vjw0UFDnw6yM17PL-Bcz"
+            });
 
             app.UseMvc(routes =>
             {

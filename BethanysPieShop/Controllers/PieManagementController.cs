@@ -47,9 +47,11 @@ namespace BethanysPieShop.Controllers
         {
             if (ModelState.IsValid)
             {
+                pieEditViewModel.Pie.CategoryId = pieEditViewModel.CategoryId;
                 _pieRepository.CreatePie(pieEditViewModel.Pie);
                 return RedirectToAction("Index");
             }
+            pieEditViewModel.Categories = _categoryRepository.Categories.Select(c => new SelectListItem() { Text = c.CategoryName, Value = c.CategoryId.ToString() }).ToList();
             return View(pieEditViewModel);
         }
 
@@ -79,6 +81,7 @@ namespace BethanysPieShop.Controllers
                 _pieRepository.UpdatePie(pieEditViewModel.Pie);
                 return RedirectToAction("Index");
             }
+            pieEditViewModel.Categories = _categoryRepository.Categories.Select(c => new SelectListItem() { Text = c.CategoryName, Value = c.CategoryId.ToString() }).ToList();
             return View(pieEditViewModel);
         }
 
@@ -86,6 +89,13 @@ namespace BethanysPieShop.Controllers
         public IActionResult DeletePie(string pieId)
         {
             return View();
+        }
+
+        [AcceptVerbs("Get", "Post")]
+        public IActionResult CheckIfPieNameAlreadyExists([Bind(Prefix = "Pie.Name")] string Name)
+        {
+            var pie = _pieRepository.Pies.FirstOrDefault(p => p.Name == Name);
+            return pie == null ? Json(true) : Json("That pie name is already taken");
         }
     }
 }

@@ -190,6 +190,44 @@ namespace BethanysPieShop.Migrations
                     b.ToTable("Pies");
                 });
 
+            modelBuilder.Entity("BethanysPieShop.Models.PieGiftOrder", b =>
+                {
+                    b.Property<int>("PieGiftOrderId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<int?>("PieId");
+
+                    b.HasKey("PieGiftOrderId");
+
+                    b.HasIndex("PieId");
+
+                    b.ToTable("PieGiftOrders");
+                });
+
+            modelBuilder.Entity("BethanysPieShop.Models.PieReview", b =>
+                {
+                    b.Property<int>("PieReviewId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("PieId");
+
+                    b.Property<string>("Review");
+
+                    b.HasKey("PieReviewId");
+
+                    b.HasIndex("PieId");
+
+                    b.ToTable("PieReviews");
+                });
+
             modelBuilder.Entity("BethanysPieShop.Models.ShoppingCartItem", b =>
                 {
                     b.Property<int>("ShoppingCartItemId")
@@ -334,6 +372,20 @@ namespace BethanysPieShop.Migrations
                         .WithMany("Pies")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("BethanysPieShop.Models.PieGiftOrder", b =>
+                {
+                    b.HasOne("BethanysPieShop.Models.Pie", "Pie")
+                        .WithMany()
+                        .HasForeignKey("PieId");
+                });
+
+            modelBuilder.Entity("BethanysPieShop.Models.PieReview", b =>
+                {
+                    b.HasOne("BethanysPieShop.Models.Pie", "Pie")
+                        .WithMany("PieReviews")
+                        .HasForeignKey("PieId");
                 });
 
             modelBuilder.Entity("BethanysPieShop.Models.ShoppingCartItem", b =>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using BethanysPieShop.Models;
 using BethanysPieShop.ViewModels;
+using System.Text.Encodings.Web;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,11 +15,15 @@ namespace BethanysPieShop.Controllers
     {
         private readonly IPieRepository _pieRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IPieReviewRepository _pieReviewRepository;
+        private readonly HtmlEncoder _htmlEncoder; 
 
-        public PieController(IPieRepository pieRepository, ICategoryRepository categoryRepository)
+        public PieController(IPieRepository pieRepository, ICategoryRepository categoryRepository, IPieReviewRepository pieReviewRepository, HtmlEncoder htmlEncoder)
         {
             _pieRepository = pieRepository;
             _categoryRepository = categoryRepository;
+            _pieReviewRepository = pieReviewRepository;
+            _htmlEncoder = htmlEncoder;
         }
 
         public ViewResult List(string category)
@@ -49,6 +54,32 @@ namespace BethanysPieShop.Controllers
                 Pies = pies,
                 CurrentCategory = currentCategory
             });
+        }
+
+        [Route("[controller]/Details/{id}")]
+        public IActionResult Details(int id)
+        {
+            var pie = _pieRepository.GetPieById(id);
+            if (pie == null)
+                return NotFound();
+            IEnumerable<PieReview> reviews = _pieReviewRepository.GetReviewsForPie(pie.PieId);
+            return View(new PieDetailViewModel() { Pie = pie, PieReviews = reviews});
+        }
+
+        [Route("[controller]/Details/{id}")]
+        [HttpPost]
+        public IActionResult Details(int id, string review)
+        {
+            var pie = _pieRepository.GetPieById(id);
+            if (pie == null)
+                return NotFound();
+
+            string encodedReview = _htmlEncoder.Encode(review);
+            _pieReviewRepository.AddPieReview(new PieReview { Pie = pie, Review = encodedReview });
+
+            IEnumerable<PieReview> reviews = _pieReviewRepository.GetReviewsForPie(pie.PieId);
+            //return View(new PieDetailViewModel() { Pie = pie , PieReviews = reviews, Review = string.Empty});
+            return RedirectToAction("Details", id);
         }
     }
 }

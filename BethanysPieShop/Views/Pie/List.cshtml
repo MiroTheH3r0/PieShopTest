@@ -1,17 +1,17 @@
-﻿@*model PiesListViewModel
+﻿@model PiesListViewModel
 
     
     <h1>@Model.CurrentCategory</h1>
     @foreach (var pie in Model.Pies)
     {
         @Html.Partial("PieOverviewSummary", pie);
-    }*@
+    }
 
 <div id="pieDiv">
 
 
 </div>
-
+@*
 @section scripts{ 
     <script>
 
@@ -45,7 +45,7 @@
                             '      <div class="caption">' +
                             '         <h3 class="pull-right">' + pie.price + '</h3>' +
                             '         <h3>' +
-                            '             <a href=/Pie/Details/' + pie.pieId + '>' + pie.name + '</a>' +
+                            '             <a href=/Pie/Details/' + pie.PieID + '>' + pie.name + ', ' + pie.PieId + '</a>' +
                             '         </h3>' +
                             '         <p>' + pie.shortDescription + '</p>' +
                             '    </div>' +
@@ -67,5 +67,5 @@
             return false;
         }
     </script>
-
+    *@
 }
