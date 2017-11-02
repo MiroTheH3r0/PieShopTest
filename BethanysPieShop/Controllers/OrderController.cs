@@ -23,6 +23,7 @@ namespace BethanysPieShop.Controllers
         //GET controller
         public IActionResult Checkout()
         {
+            //taki sobie komentarz
             return View();
         }
 
